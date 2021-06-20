@@ -12,6 +12,9 @@ class customdatafieldView extends Ui.DataField {
     hidden var currentSpeed = 0;
     hidden var lapSpeed = 0;
     hidden var averageSpeed = 0;
+    hidden var currentPower = 0;
+    hidden var lapPower = 0;
+    hidden var averagePower = 0;
     hidden var paceValueMinutes = 0;
     hidden var paceValueSeconds= 0;
     hidden var lapPaceValueMinutes = 0;
@@ -21,9 +24,11 @@ class customdatafieldView extends Ui.DataField {
     hidden var cadenceValue = 0;
     hidden var hrValue = 0;
     hidden var iteration = 0;
+    hidden var runningPower;
 
     function initialize() {
         DataField.initialize();
+        runningPower = new RunningPower();
     }
         
     function convertToMinutesPerUnit(speed){
@@ -48,7 +53,9 @@ class customdatafieldView extends Ui.DataField {
         lapSpeed = lapDistance > 0 ? lapDistance / lapTime : 0;
         averageSpeed = info.averageSpeed != null ? info.averageSpeed : 0;     
         cadenceValue = info.currentCadence != null ? info.currentCadence : 0;
-        hrValue = info.currentHeartRate != null ? info.currentHeartRate : 0;
+        hrValue = info.currentHeartRate != null ? info.currentHeartRate : 0;        
+        
+        currentPower = runningPower.DijkAndMegen(currentSpeed, elapsedDistance, info.altitude);
         
     }
     

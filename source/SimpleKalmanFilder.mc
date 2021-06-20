@@ -5,61 +5,61 @@
 
 class SimpleKalmanFilter {
 
-    hidden var _err_measure;
-    hidden var _err_estimate;
-    hidden var _q;
-    hidden var _current_estimate;
-    hidden var _last_estimate;
-    hidden var _kalman_gain;
+    hidden var err_measure;
+    hidden var err_estimate;
+    hidden var q;
+    hidden var current_estimate;
+    hidden var last_estimate;
+    hidden var kalman_gain;
 
-    function initialize(mea_e, est_e, q) 
+    function initialize(mea_e, est_e, q_e) 
     {
-        _err_measure=mea_e;
-        _err_estimate=est_e;
-        _last_estimate=null;
-        _q = q;
+        err_measure=mea_e;
+        err_estimate=est_e;
+        last_estimate=null;
+        q = q_e;
     }
 
     function updateEstimate(mea) 
     {
-        if(_last_estimate == null)
+        if(last_estimate == null)
          {
-            _last_estimate = mea;
+            last_estimate = mea;
          }
-        _kalman_gain = _err_estimate/(_err_estimate + _err_measure);
-        _current_estimate = _last_estimate + _kalman_gain * (mea - _last_estimate);
-        _err_estimate =  (1.0 - _kalman_gain) * _err_estimate + Toybox.Lang.Float.abs(_last_estimate-_current_estimate)*_q;
-        _last_estimate=_current_estimate;
-        return (_current_estimate);
+        kalman_gain = err_estimate/(err_estimate + err_measure);
+        current_estimate = last_estimate + kalman_gain * (mea - last_estimate);
+        err_estimate =  (1.0 - kalman_gain) * err_estimate + Toybox.Lang.Float.abs(last_estimate-current_estimate)*q;
+        last_estimate=current_estimate;
+        return (current_estimate);
     }
 
     function setMeasurementError(mea_e)
     {
-        _err_measure=mea_e;
+        err_measure=mea_e;
     }
 
 
     function setEstimateError(est_e)
     {
-        _err_estimate=est_e;
+        err_estimate=est_e;
     }
 
 
     function setProcessNoise(q)
     {
-        _q=q;
+        q=q;
     }
 
 
     function getKalmanGain()
     {
-        return (_kalman_gain);
+        return (kalman_gain);
     }
 
 
     function getEstimateError()
     {
-        return (_err_estimate);
+        return (err_estimate);
     }
 
 }
