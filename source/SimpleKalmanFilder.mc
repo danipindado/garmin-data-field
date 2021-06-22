@@ -28,7 +28,7 @@ class SimpleKalmanFilter {
          }
         kalman_gain = err_estimate/(err_estimate + err_measure);
         current_estimate = last_estimate + kalman_gain * (mea - last_estimate);
-        err_estimate =  (1.0 - kalman_gain) * err_estimate + Toybox.Lang.Float.abs(last_estimate-current_estimate)*q;
+        err_estimate =  (1.0 - kalman_gain) * err_estimate +(last_estimate-current_estimate).abs()*q;
         last_estimate=current_estimate;
         return (current_estimate);
     }

@@ -157,15 +157,16 @@ class customdatafieldView extends Ui.DataField {
         }
         
         dc.drawText(width * .75, height * .315, valueSize, paceText, Graphics.TEXT_JUSTIFY_CENTER);
-        System.println("Pace: " + currentSpeed);
-        
+        // System.println("Pace: " + currentSpeed);
+        System.println("power: " + currentPower);
+
 		var lapPaceText;
 		var lapDistance = elapsedDistance - lapStartDistance;
 		var lapTime = (elapsedTime - lapStartTime) / 1000;
 		if(lapDistance > 0){
 			if(iteration % 10 == 0){
 				var lapSpeed = lapDistance / lapTime;
-				System.println("Lap Pace: " + lapSpeed);
+				// System.println("Lap Pace: " + lapSpeed);
 				var timePerUnit = convertToMinutesPerUnit(lapSpeed);
 				lapPaceValueMinutes = timePerUnit.toNumber();
 				lapPaceValueSeconds = ((timePerUnit - lapPaceValueMinutes) * 60).toNumber();
@@ -190,7 +191,7 @@ class customdatafieldView extends Ui.DataField {
         }
         
 		dc.drawText(width * .25, height * .615, valueSize, avgPaceText, Graphics.TEXT_JUSTIFY_CENTER);
-		System.println("Avg. Pace " + averageSpeed);
+		// System.println("Avg. Pace " + averageSpeed);
 		
 		var hrText;
         if (hrValue == 0) {

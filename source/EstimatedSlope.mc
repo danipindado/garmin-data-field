@@ -18,6 +18,10 @@ class EstimatedSlope {
         self.previousAltitude = self.currentAltitude;
         self.currentDistance = distance;
         self.currentAltitude = kalmanFilter.updateEstimate(raw_altitude);
+        System.println("currentAltitude: " + currentAltitude);
+        System.println("previousAltitude: " + previousAltitude);
+        System.println("currentDistance: " + currentDistance);
+        System.println("previousDistance: " + previousDistance);
 
         if( (self.previousAltitude != null) &&
             (self.currentAltitude != null) && 
@@ -31,6 +35,8 @@ class EstimatedSlope {
         {
             slope = 0.0;
         }
+        System.println("slope: " + slope);
+
         return (slope);
     }
 }
