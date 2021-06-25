@@ -4,17 +4,18 @@ using Toybox.Graphics as Gfx;
 class customdatafieldView extends Ui.DataField {
 
 	hidden var elapsedDistance = 0;
-	hidden var lapStartDistance = 0;
+    hidden var lapStartDistance = 0;
 	hidden var lapDistance = 0;
+    hidden var elapsedEnergy = 0;
+	hidden var lapStartEnergy = 0;
+	hidden var lapEnergy = 0;
     hidden var elapsedTime = 0;
     hidden var lapStartTime = 0;
     hidden var lapTime = 0;
     hidden var currentSpeed = 0;
-    hidden var lapSpeed = 0;
-    hidden var averageSpeed = 0;
-    hidden var currentPower = 0;
     hidden var lapPower = 0;
     hidden var averagePower = 0;
+    hidden var currentPower = 0;
     hidden var paceValueMinutes = 0;
     hidden var paceValueSeconds= 0;
     hidden var lapPaceValueMinutes = 0;
@@ -30,38 +31,38 @@ class customdatafieldView extends Ui.DataField {
         DataField.initialize();
         runningPower = new RunningPower();
     }
-        
-    function convertToMinutesPerUnit(speed){
-    	if(System.getDeviceSettings().distanceUnits == System.UNIT_STATUTE){
-        	return (26.8224 / speed);
-        }else{
-        	return (16.66667 / speed);
-        }
-    }
-    
+            
     // The given info object contains all the current workout information.
     // Calculate a value and save it locally in this method.
     // Note that compute() and onUpdate() are asynchronous, and there is no
     // guarantee that compute() will be called before onUpdate().
     function compute(info) {
-    
+            
         elapsedDistance = info.elapsedDistance != null ? info.elapsedDistance : 0;
         elapsedTime = info.timerTime != null ? info.timerTime : 0;
-        lapDistance = elapsedDistance - lapStartDistance;
+        lapDistance = elapsedDistance - lapStartDistance;        
         lapTime = elapsedTime - lapStartTime;
-        currentSpeed = info.currentSpeed != null ? info.currentSpeed : 0;
-        lapSpeed = lapDistance > 0 ? lapDistance / lapTime : 0;
-        averageSpeed = info.averageSpeed != null ? info.averageSpeed : 0;     
         cadenceValue = info.currentCadence != null ? info.currentCadence : 0;
         hrValue = info.currentHeartRate != null ? info.currentHeartRate : 0;        
         
-        currentPower = runningPower.DijkAndMegen(currentSpeed, elapsedDistance, info.altitude);
-        
+        currentPower = runningPower.DijkAndMegen(info.currentSpeed, elapsedEnergy, info.altitude);
+        elapsedEnergy = elapsedEnergy + (elapsedTime > 0 ? currentPower : 0);
+        lapEnergy = elapsedEnergy - lapStartEnergy;
+        lapPower = lapTime > 0 ? 1000 * lapEnergy / lapTime : 0;
+        averagePower = elapsedTime > 0 ? 1000 * elapsedEnergy / elapsedTime : 0;
+
     }
     
     function onTimerLap(){
     	lapStartDistance = elapsedDistance;
     	lapStartTime = elapsedTime;
+        lapStartEnergy = elapsedEnergy;
+    }
+    
+    function onTimerStart(){
+    	lapStartDistance = 0;
+    	lapStartTime = 0;
+        lapStartEnergy = 0;
     }
 
     // Display the value you computed here. This will be called
@@ -96,8 +97,11 @@ class customdatafieldView extends Ui.DataField {
         
         // this is going up here because we're gonna shift some stuff based on distance
         var distanceValue = elapsedDistance * 0.001;
-        if(System.getDeviceSettings().distanceUnits == System.UNIT_STATUTE){
+        var distanceUnit = "km";
+        if(System.getDeviceSettings().distanceUnits == System.UNIT_STATUTE)
+        {
         	distanceValue = elapsedDistance * 0.000621371;
+            distanceUnit = "mi";
         }
         
         var distanceLabelX = (distanceValue > 10.0) ? width * .675 : width * .6375;
@@ -105,11 +109,11 @@ class customdatafieldView extends Ui.DataField {
         
         // Draw Labels
         dc.setColor(labelColor, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(distanceLabelX, height * .0725, labelSize, "mi", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(distanceLabelX, height * .0725, labelSize, distanceUnit, Graphics.TEXT_JUSTIFY_CENTER);
         dc.drawText(width * .25, height * .22, labelSize, "Timer", Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(width * .75, height * .22, labelSize, "Pace", Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(width * .25, height * .52, labelSize, "Avg. Pace", Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(width * .75, height * .52, labelSize, "Lap Pace", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(width * .75, height * .22, labelSize, "Power", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(width * .25, height * .52, labelSize, "Avg. Power", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(width * .75, height * .52, labelSize, "Lap Power", Graphics.TEXT_JUSTIFY_CENTER);
         dc.drawText(width * .33, height * .82, labelSize, "HR", Graphics.TEXT_JUSTIFY_CENTER);
         
         dc.setColor(valueColor, Graphics.COLOR_TRANSPARENT);
@@ -135,63 +139,35 @@ class customdatafieldView extends Ui.DataField {
         	dc.drawText(width * .25, height * .315, valueSize, timeText, Graphics.TEXT_JUSTIFY_CENTER);
         }
         
-        var paceText;
+        var powerText;
   		    
-        if(currentSpeed > 0){
-        	if(iteration <= 2 || iteration % 2 == 0){
-        		var timePerUnit = convertToMinutesPerUnit(currentSpeed);
-        		paceValueMinutes = timePerUnit.toNumber();
-        		paceValueSeconds = ((timePerUnit - paceValueMinutes) * 60).toNumber();
-        	}
-        	
-        	var tooSlowImperial = (System.getDeviceSettings().distanceUnits == System.UNIT_STATUTE) && paceValueMinutes > 15;
-        	var tooSlowMetric = (System.getDeviceSettings().distanceUnits == System.UNIT_METRIC) && paceValueMinutes > 9;
-        	
-        	if(tooSlowImperial || tooSlowMetric) {
-        		paceText = "--:--";
-        	} else {
-        		paceText = paceValueMinutes.format("%d")+":"+paceValueSeconds.format("%02d");
-        	}
-        }else {
-        	paceText = "--:--";
-        }
+        if (currentPower == 0) {
+        	powerText = "--";
+        } else {
+        	powerText = currentPower.format("%d");
+		}
         
-        dc.drawText(width * .75, height * .315, valueSize, paceText, Graphics.TEXT_JUSTIFY_CENTER);
-        // System.println("Pace: " + currentSpeed);
-        System.println("power: " + currentPower);
+        dc.drawText(width * .75, height * .315, valueSize, powerText, Graphics.TEXT_JUSTIFY_CENTER);
+        //System.println("power: " + currentPower);
 
-		var lapPaceText;
-		var lapDistance = elapsedDistance - lapStartDistance;
-		var lapTime = (elapsedTime - lapStartTime) / 1000;
-		if(lapDistance > 0){
-			if(iteration % 10 == 0){
-				var lapSpeed = lapDistance / lapTime;
-				// System.println("Lap Pace: " + lapSpeed);
-				var timePerUnit = convertToMinutesPerUnit(lapSpeed);
-				lapPaceValueMinutes = timePerUnit.toNumber();
-				lapPaceValueSeconds = ((timePerUnit - lapPaceValueMinutes) * 60).toNumber();
-			}
-			lapPaceText = lapPaceValueMinutes.format("%d")+":"+lapPaceValueSeconds.format("%02d");
+		var lapPowerText;
+		if(lapEnergy > 0){
+			lapPowerText = lapPower.format("%d");
 		}else {
-			lapPaceText = "--:--";
+			lapPowerText = "--";
 		}
 		
-		dc.drawText(width * .75, height * .615, valueSize, lapPaceText, Graphics.TEXT_JUSTIFY_CENTER);
+		dc.drawText(width * .75, height * .615, valueSize, lapPowerText, Graphics.TEXT_JUSTIFY_CENTER);
         
-        var avgPaceText;
-        if(averageSpeed > 0){
-        	if(iteration % 10 == 0){
-        		var timePerUnit = convertToMinutesPerUnit(averageSpeed);
-        		avgPaceValueMinutes = timePerUnit.toNumber();
-        		avgPaceValueSeconds = ((timePerUnit - avgPaceValueMinutes) * 60).toNumber();
-        	}
-        	avgPaceText = avgPaceValueMinutes.format("%d")+":"+avgPaceValueSeconds.format("%02d");
+        var avgPowerText;
+        if(averagePower > 0){
+        	avgPowerText = averagePower.format("%d");
         }else {
-        	avgPaceText = "--:--";
+        	avgPowerText = "--";
         }
         
-		dc.drawText(width * .25, height * .615, valueSize, avgPaceText, Graphics.TEXT_JUSTIFY_CENTER);
-		// System.println("Avg. Pace " + averageSpeed);
+		dc.drawText(width * .25, height * .615, valueSize, avgPowerText, Graphics.TEXT_JUSTIFY_CENTER);
+		// System.println("Avg. Power " + averagePower);
 		
 		var hrText;
         if (hrValue == 0) {
