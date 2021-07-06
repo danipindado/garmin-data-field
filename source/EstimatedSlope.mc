@@ -31,6 +31,7 @@ class EstimatedSlope {
         {
             slope = 0.0;
         }
+        // System.println("slope: " + slope);
 
         return (slope);
     }

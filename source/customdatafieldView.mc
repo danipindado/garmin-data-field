@@ -11,6 +11,7 @@ class customdatafieldView extends Ui.DataField {
 	hidden var lapEnergy = 0;
     hidden var elapsedTime = 0;
     hidden var lapStartTime = 0;
+    hidden var lastComputeTime = 0;
     hidden var lapTime = 0;
     hidden var currentSpeed = 0;
     hidden var lapPower = 0;
@@ -46,11 +47,19 @@ class customdatafieldView extends Ui.DataField {
         hrValue = info.currentHeartRate != null ? info.currentHeartRate : 0;        
         
         currentPower = runningPower.DijkAndMegen(info.currentSpeed, elapsedEnergy, info.altitude);
-        elapsedEnergy = elapsedEnergy + (elapsedTime > 0 ? currentPower : 0);
+        elapsedEnergy += elapsedTime > 0 ? (currentPower * (elapsedTime - lastComputeTime)/1000.0) : 0.0;
         lapEnergy = elapsedEnergy - lapStartEnergy;
-        lapPower = lapTime > 0 ? 1000 * lapEnergy / lapTime : 0;
-        averagePower = elapsedTime > 0 ? 1000 * elapsedEnergy / elapsedTime : 0;
+        lapPower = lapTime > 0 ? 1000.0 * lapEnergy / lapTime : 0;
+        averagePower = elapsedTime > 0 ? 1000.0 * elapsedEnergy / elapsedTime : 0;
+        lastComputeTime = elapsedTime;
+        // System.println("currentPower: " + currentPower);
+        // System.println("lapPower: " + lapPower);
+        // System.println("averagePower: " + averagePower);
 
+        // System.println("elapsedTime: " + elapsedTime);
+        // System.println("lapTime: " + lapTime);
+        // System.println("elapsedEnergy: " + elapsedEnergy);
+        // System.println("averagePower: " + averagePower);
     }
     
     function onTimerLap(){
@@ -59,12 +68,6 @@ class customdatafieldView extends Ui.DataField {
         lapStartEnergy = elapsedEnergy;
     }
     
-    function onTimerStart(){
-    	lapStartDistance = 0;
-    	lapStartTime = 0;
-        lapStartEnergy = 0;
-    }
-
     // Display the value you computed here. This will be called
     // once a second when the data field is visible.
     function onUpdate(dc) {
