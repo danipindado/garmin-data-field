@@ -17,20 +17,14 @@ class customdatafieldView extends Ui.DataField {
     hidden var lapPower = 0;
     hidden var averagePower = 0;
     hidden var currentPower = 0;
-    hidden var paceValueMinutes = 0;
-    hidden var paceValueSeconds= 0;
-    hidden var lapPaceValueMinutes = 0;
-    hidden var lapPaceValueSeconds = 0;
-    hidden var avgPaceValueMinutes = 0;
-    hidden var avgPaceValueSeconds = 0;
-    hidden var cadenceValue = 0;
     hidden var hrValue = 0;
-    hidden var iteration = 0;
-    hidden var runningPower;
+    hidden var runningPower = 0;
+    var mFitContributor;
 
     function initialize() {
         DataField.initialize();
         runningPower = new RunningPower();
+        mFitContributor = new FitContributor(self);
     }
             
     // The given info object contains all the current workout information.
@@ -43,7 +37,6 @@ class customdatafieldView extends Ui.DataField {
         elapsedTime = info.timerTime != null ? info.timerTime : 0;
         lapDistance = elapsedDistance - lapStartDistance;        
         lapTime = elapsedTime - lapStartTime;
-        cadenceValue = info.currentCadence != null ? info.currentCadence : 0;
         hrValue = info.currentHeartRate != null ? info.currentHeartRate : 0;        
         
         currentPower = runningPower.DijkAndMegen(info.currentSpeed, elapsedEnergy, info.altitude);
@@ -52,6 +45,9 @@ class customdatafieldView extends Ui.DataField {
         lapPower = lapTime > 0 ? 1000.0 * lapEnergy / lapTime : 0;
         averagePower = elapsedTime > 0 ? 1000.0 * elapsedEnergy / elapsedTime : 0;
         lastComputeTime = elapsedTime;
+
+        mFitContributor.compute([currentPower,0]);
+
         // System.println("currentPower: " + currentPower);
         // System.println("lapPower: " + lapPower);
         // System.println("averagePower: " + averagePower);
@@ -71,8 +67,6 @@ class customdatafieldView extends Ui.DataField {
     // Display the value you computed here. This will be called
     // once a second when the data field is visible.
     function onUpdate(dc) {
-    	// going to use to tell some things when to refresh
-    	iteration += 1;
     	
     	var width = dc.getWidth();
     	var height = dc.getHeight();
@@ -84,7 +78,6 @@ class customdatafieldView extends Ui.DataField {
     	var labelSize = Graphics.FONT_TINY;
     	
     	var distanceYPosition = (height > 214) ? height * .04 : height * .03;
-    	var distanceSize = (height > 214) ? Graphics.FONT_MEDIUM : Graphics.FONT_LARGE; 
     	
         // Set the background color
         dc.setColor(backgroundColor, backgroundColor);
@@ -181,5 +174,21 @@ class customdatafieldView extends Ui.DataField {
 		dc.drawText(width / 2, height * .82, valueSize, hrText, Graphics.TEXT_JUSTIFY_CENTER);
 
     }
+
+    function onTimerStart() {
+        mFitContributor.setTimerRunning( true );
+    }
+
+    function onTimerStop() {
+        mFitContributor.setTimerRunning( false );
+    }
+
+    function onTimerPause() {
+        mFitContributor.setTimerRunning( false );
+    }
+
+    function onTimerResume() {
+        mFitContributor.setTimerRunning( true );
+    }    
 
 }
