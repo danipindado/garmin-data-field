@@ -18,7 +18,7 @@ class RunningPower {
         var runningResistance = 0.98 * 83 * speed;
         var airResistance = 0.5 * 1.205 * 0.24 * Math.pow(speed, 3);
         var currentSlope = slope.getSlope(distance,altitude);
-        var climbingResistance = currentSlope * 83 * 9.81 * (45.6 + 116.22 * currentSlope) / 100;
+        var climbingResistance = currentSlope * 83 * 9.81 * speed * 0.01 * (45.6 + 1.1622 * 100 * currentSlope);
         return (runningResistance + airResistance + climbingResistance);
     }
 }
