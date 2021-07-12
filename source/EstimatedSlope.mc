@@ -1,23 +1,26 @@
 class EstimatedSlope {
 
-    hidden var kalmanFilter;
+    hidden var altitudeFilter;
+    hidden var distanceFilter;
+    hidden var slope = 0.0;
     hidden var currentAltitude = null;
-    hidden var currentDistance = null;
     hidden var previousAltitude = null;
+    hidden var currentDistance = null;
     hidden var previousDistance = null;
 
     function initialize() 
     {        
-        kalmanFilter = new SimpleKalmanFilter(5, 5, 0.02);
+        altitudeFilter = new SimpleKalmanFilter(2, 2, 0.2);
+        distanceFilter = new SimpleKalmanFilter(5, 5, 0.2);
     }
 
-    function getSlope(distance,raw_altitude) 
+    function getSlope(raw_distance,raw_altitude) 
     {
-        var slope;
-        self.previousDistance = self.currentDistance;
         self.previousAltitude = self.currentAltitude;
-        self.currentDistance = distance;
-        self.currentAltitude = kalmanFilter.updateEstimate(raw_altitude);
+        self.currentAltitude = altitudeFilter.updateEstimate(raw_altitude);
+
+        self.previousDistance = self.currentDistance;
+        self.currentDistance = distanceFilter.updateEstimate(raw_distance) ;
 
         if( (self.previousAltitude != null) &&
             (self.currentAltitude != null) && 
@@ -25,14 +28,10 @@ class EstimatedSlope {
             (self.currentDistance != null) &&
             (self.previousDistance != self.currentDistance))
         {
-            slope = (self.currentAltitude-self.previousAltitude)/(self.currentDistance-self.previousDistance);
-        }
-        else
-        {
-            slope = 0.0;
+            self.slope = (self.currentAltitude-self.previousAltitude)/(self.currentDistance-self.previousDistance);
         }
         // System.println("slope: " + slope);
 
-        return (slope);
+        return (self.slope);
     }
 }
