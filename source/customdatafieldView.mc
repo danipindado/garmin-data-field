@@ -39,7 +39,7 @@ class customdatafieldView extends Ui.DataField {
         lapTime = elapsedTime - lapStartTime;
         hrValue = info.currentHeartRate != null ? info.currentHeartRate : 0;        
         
-        currentPower = runningPower.DijkAndMegen(info.currentSpeed, elapsedEnergy, info.altitude);
+        currentPower = runningPower.DijkAndMegen(info.currentSpeed, elapsedDistance, info.altitude);
         elapsedEnergy += elapsedTime > 0 ? (currentPower * (elapsedTime - lastComputeTime)/1000.0) : 0.0;
         lapEnergy = elapsedEnergy - lapStartEnergy;
         lapPower = lapTime > 0 ? 1000.0 * lapEnergy / lapTime : 0;
@@ -62,6 +62,11 @@ class customdatafieldView extends Ui.DataField {
     	lapStartDistance = elapsedDistance;
     	lapStartTime = elapsedTime;
         lapStartEnergy = elapsedEnergy;
+    }
+
+    function onWorkoutStepComplete()
+    {
+        onTimerLap();
     }
     
     // Display the value you computed here. This will be called
