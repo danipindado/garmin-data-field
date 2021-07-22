@@ -10,8 +10,8 @@ class EstimatedSlope {
 
     function initialize() 
     {        
-        altitudeFilter = new SimpleKalmanFilter(0.25, 0.25, 0.0079);
-        distanceFilter = new SimpleKalmanFilter(3.9, 3.9, 0.01);
+        altitudeFilter = new SimpleKalmanFilter(0.5, 0.5, 0.011);
+        distanceFilter = new SimpleKalmanFilter(0.1, 0.1, 0.007);
     }
 
     function getSlope(raw_distance,raw_altitude) 
