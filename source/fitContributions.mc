@@ -11,17 +11,14 @@ using Toybox.FitContributor as Fit;
 class FitContributor {
     // FIT Contributions variables
     hidden var mCurrentRunningPower = null;
-    hidden var mCurrentSlope = null;
     var mTimerRunning = false;
     
 
     // Constructor
     function initialize(dataField) {
         mCurrentRunningPower = dataField.createField("RunningPower", 1, Fit.DATA_TYPE_SINT16, { :nativeNum=>7, :mesgType=>Fit.MESG_TYPE_RECORD, :units=>"W" });
-        mCurrentSlope = dataField.createField("RunningPower", 4, Fit.DATA_TYPE_SINT16, { :mesgType=>Fit.MESG_TYPE_RECORD, :units=>"%" });
 
         mCurrentRunningPower.setData(0);
-        mCurrentSlope.setData(0);
     }
 
     function compute(sensor) 
@@ -30,7 +27,6 @@ class FitContributor {
         {
             // Hemoglobin Concentration is stored in 1/100ths g/dL fixed point
             mCurrentRunningPower.setData( sensor[0] );
-            mCurrentSlope.setData( sensor[1] );
 
             if( mTimerRunning ) 
             {

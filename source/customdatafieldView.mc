@@ -3,22 +3,22 @@ using Toybox.Graphics as Gfx;
 
 class customdatafieldView extends Ui.DataField {
 
-	hidden var elapsedDistance = 0;
-    hidden var lapStartDistance = 0;
-	hidden var lapDistance = 0;
-    hidden var elapsedEnergy = 0;
-	hidden var lapStartEnergy = 0;
-	hidden var lapEnergy = 0;
-    hidden var elapsedTime = 0;
-    hidden var lapStartTime = 0;
-    hidden var lastComputeTime = 0;
-    hidden var lapTime = 0;
-    hidden var currentSpeed = 0;
-    hidden var lapPower = 0;
-    hidden var averagePower = 0;
-    hidden var currentPower = 0;
+	hidden var elapsedDistance = 0.0;
+    hidden var lapStartDistance = 0.0;
+	hidden var lapDistance = 0.0;
+    hidden var elapsedEnergy = 0.0;
+	hidden var lapStartEnergy = 0.0;
+	hidden var lapEnergy = 0.0;
+    hidden var elapsedTime = 0.0;
+    hidden var lapStartTime = 0.0;
+    hidden var lastComputeTime = 0.0;
+    hidden var lapTime = 0.0;
+    hidden var currentSpeed = 0.0;
+    hidden var lapPower = 0.0;
+    hidden var averagePower = 0.0;
+    hidden var currentPower = 0.0;
     hidden var hrValue = 0;
-    hidden var runningPower = 0;
+    hidden var runningPower = 0.0;
     var mFitContributor;
 
     function initialize() {
@@ -33,20 +33,21 @@ class customdatafieldView extends Ui.DataField {
     // guarantee that compute() will be called before onUpdate().
     function compute(info) {
             
-        elapsedDistance = info.elapsedDistance != null ? info.elapsedDistance : 0;
         elapsedTime = info.timerTime != null ? info.timerTime : 0;
-        lapDistance = elapsedDistance - lapStartDistance;        
-        lapTime = elapsedTime - lapStartTime;
         hrValue = info.currentHeartRate != null ? info.currentHeartRate : 0;        
-        currentPower = info.altitude != null ? runningPower.DijkAndMegen(info.currentSpeed, elapsedDistance, info.altitude) : 0;
-        elapsedEnergy += elapsedTime > 0 ? (currentPower * (elapsedTime - lastComputeTime)/1000.0) : 0.0;
-        lapEnergy = elapsedEnergy - lapStartEnergy;
-        lapPower = lapTime > 0 ? 1000.0 * lapEnergy / lapTime : 0;
-        averagePower = elapsedTime > 0 ? 1000.0 * elapsedEnergy / elapsedTime : 0;
-        lastComputeTime = elapsedTime;
-
-        mFitContributor.compute([currentPower,0]);
-
+        if(elapsedTime != lastComputeTime)
+        {
+            elapsedDistance = info.elapsedDistance != null ? info.elapsedDistance : 0.0;
+            lapDistance = elapsedDistance - lapStartDistance;        
+            lapTime = elapsedTime - lapStartTime;
+            currentPower = info.altitude != null ? runningPower.DijkAndMegen(info.currentSpeed, elapsedDistance, info.altitude) : 0.0;
+            elapsedEnergy += elapsedTime > 0 ? (currentPower * (elapsedTime - lastComputeTime)/1000.0) : 0.0;
+            lapEnergy = elapsedEnergy - lapStartEnergy;
+            lapPower = lapTime > 0 ? 1000.0 * lapEnergy / lapTime : 0.0;
+            averagePower = elapsedTime > 0 ? 1000.0 * elapsedEnergy / elapsedTime : 0.0;
+            lastComputeTime = elapsedTime;
+            mFitContributor.compute([currentPower]);
+        }
         // System.println("currentPower: " + currentPower);
         // System.println("lapPower: " + lapPower);
         // System.println("averagePower: " + averagePower);

@@ -3,6 +3,7 @@ class EstimatedSlope {
     hidden var altitudeFilter;
     hidden var distanceFilter;
     hidden var slope = 0.0;
+    hidden var previousSlope = null;
     hidden var currentAltitude = null;
     hidden var previousAltitude = null;
     hidden var currentDistance = null;
@@ -29,6 +30,7 @@ class EstimatedSlope {
             (self.previousDistance != self.currentDistance))
         {
             self.slope = (self.currentAltitude-self.previousAltitude)/(self.currentDistance-self.previousDistance);
+            self.slope = self.slope > 0.45 ? 0.45 : (self.slope < -0.45 ? -0.45 : self.slope);
         }
         // System.println("slope: " + slope);
         // System.println("raw_altitude: " + raw_altitude);
