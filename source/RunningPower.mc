@@ -32,7 +32,7 @@ class RunningPower {
         var pace_adjustment = ((((-45.704 * currentSlope - 3.3882 ) * currentSlope + 18.814)* currentSlope + 3.0266) * currentSlope + 0.98462);
 
         // c-value (the running economy or Energy Cost of Running) of 0.98 kJ/kg/km, body weight and speed
-        runningresistance = 0.98 * 83.0 * speed * pace_adjustment;
+        var runningresistance = 0.98 * 83.0 * speed * pace_adjustment;
     return (runningresistance);
 
     }
