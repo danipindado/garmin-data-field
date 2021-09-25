@@ -40,7 +40,7 @@ class customdatafieldView extends Ui.DataField {
             elapsedDistance = info.elapsedDistance != null ? info.elapsedDistance : 0.0;
             lapDistance = elapsedDistance - lapStartDistance;        
             lapTime = elapsedTime - lapStartTime;
-            currentPower = info.altitude != null ? runningPower.DijkAndMegen(info.currentSpeed, elapsedDistance, info.altitude) : 0.0;
+            currentPower = info.altitude != null ? runningPower.Strava(info.currentSpeed, elapsedDistance, info.altitude) : 0.0;
             elapsedEnergy += elapsedTime > 0 ? (currentPower * (elapsedTime - lastComputeTime)/1000.0) : 0.0;
             lapEnergy = elapsedEnergy - lapStartEnergy;
             lapPower = lapTime > 0 ? 1000.0 * lapEnergy / lapTime : 0.0;
