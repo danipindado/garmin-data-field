@@ -3,7 +3,8 @@ using Toybox.Graphics as Gfx;
 
 class customdatafieldView extends Ui.DataField {
 
-	hidden var elapsedDistance = 0.0;
+	hidden var currentVerticalState = null;
+    hidden var elapsedDistance = 0.0;
     hidden var lapStartDistance = 0.0;
 	hidden var lapDistance = 0.0;
     hidden var elapsedEnergy = 0.0;
@@ -16,6 +17,7 @@ class customdatafieldView extends Ui.DataField {
     hidden var currentSpeed = 0.0;
     hidden var lapPower = 0.0;
     hidden var averagePower = 0.0;
+    hidden var currentSlope = 0.0;
     hidden var currentPower = 0.0;
     hidden var hrValue = 0;
     hidden var runningPower = 0.0;
@@ -37,10 +39,19 @@ class customdatafieldView extends Ui.DataField {
         hrValue = info.currentHeartRate != null ? info.currentHeartRate : 0;        
         if(elapsedTime != lastComputeTime)
         {
+            if(null == currentVerticalState)
+            {
+                currentVerticalState = info.altitude != null ? new VerticalState(info.altitude) : null;
+            }
+            else
+            {
+                currentVerticalState.update(info.altitude);
+            }
             elapsedDistance = info.elapsedDistance != null ? info.elapsedDistance : 0.0;
             lapDistance = elapsedDistance - lapStartDistance;        
             lapTime = elapsedTime - lapStartTime;
-            currentPower = info.altitude != null ? runningPower.Strava(info.currentSpeed, elapsedDistance, info.altitude) : 0.0;
+            currentSlope = (currentVerticalState != null && info.currentSpeed != 0.0) ?  currentVerticalState.kalmanvel_z / info.currentSpeed : currentSlope;
+            currentPower = info.currentSpeed != null ? runningPower.Strava(info.currentSpeed, currentSlope) : 0.0;
             elapsedEnergy += elapsedTime > 0 ? (currentPower * (elapsedTime - lastComputeTime)/1000.0) : 0.0;
             lapEnergy = elapsedEnergy - lapStartEnergy;
             lapPower = lapTime > 0 ? 1000.0 * lapEnergy / lapTime : 0.0;
